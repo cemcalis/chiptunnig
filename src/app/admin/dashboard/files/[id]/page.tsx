@@ -1,13 +1,14 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { UploadCloud, Download, CheckCircle, XCircle } from 'lucide-react';
 import { ChatSection } from '@/components/files/ChatSection';
 
-export default function ManageFilePage({ params }: { params: { id: string } }) {
+export default function ManageFilePage({ params }: { params: Promise<{ id: string }> }) {
+    const { id } = React.use(params);
     const router = useRouter();
     const [file, setFile] = useState<any>(null);
     const [isLoading, setIsLoading] = useState(true);
@@ -18,16 +19,16 @@ export default function ManageFilePage({ params }: { params: { id: string } }) {
     const adminName = 'Super Admin';
 
     useEffect(() => {
-        fetch(`/api/files/${params.id}`)
+        fetch(`/api/files/${id}`)
             .then(res => res.json())
             .then(data => {
                 setFile(data);
                 setIsLoading(false);
             });
-    }, [params.id]);
+    }, [id]);
 
     async function handleStatusUpdate(status: string) {
-        await fetch(`/api/files/${params.id}`, {
+        await fetch(`/api/files/${id}`, {
             method: 'PATCH',
             body: (() => {
                 const fd = new FormData();
@@ -45,7 +46,7 @@ export default function ManageFilePage({ params }: { params: { id: string } }) {
         const formData = new FormData(e.currentTarget);
         formData.append('status', 'completed');
 
-        await fetch(`/api/files/${params.id}`, {
+        await fetch(`/api/files/${id}`, {
             method: 'PATCH',
             body: formData
         });

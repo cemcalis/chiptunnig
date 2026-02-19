@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
@@ -8,7 +8,8 @@ import { UploadCloud, Download, FileText, ArrowLeft, CheckCircle2 } from 'lucide
 import { ChatSection } from '@/components/files/ChatSection';
 import Link from 'next/link';
 
-export default function FileDetailPage({ params }: { params: { id: string } }) {
+export default function FileDetailPage({ params }: { params: Promise<{ id: string }> }) {
+    const { id } = React.use(params);
     const router = useRouter();
     const [file, setFile] = useState<any>(null);
     const [isLoading, setIsLoading] = useState(true);
@@ -18,14 +19,14 @@ export default function FileDetailPage({ params }: { params: { id: string } }) {
         // Fetch user session for chat identity
         fetch('/api/auth/me').then(res => res.json()).then(data => setUserEmail(data.name || 'User'));
 
-        fetch(`/api/files/${params.id}`)
+        fetch(`/api/files/${id}`)
             .then(res => res.json())
             .then(data => {
                 setFile(data);
                 setIsLoading(false);
             })
             .catch(err => setIsLoading(false));
-    }, [params.id]);
+    }, [id]);
 
     if (isLoading) return <div className="text-center p-10 text-gray-500">Dosya bilgileri yükleniyor...</div>;
     if (!file) return <div className="text-center p-10 text-gray-500">Dosya bulunamadı.</div>;

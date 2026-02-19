@@ -5,14 +5,14 @@ import { writeFile } from 'fs/promises';
 import { join } from 'path';
 import fs from 'fs';
 
-export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
     try {
+        const { id: fileId } = await params;
         const session = await getSession();
         if (!session || (session as any).role !== 'admin') {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        const fileId = params.id;
         const formData = await req.formData();
         const status = formData.get('status') as string;
         const moddedFile = formData.get('modded_file') as File | null;
@@ -64,16 +64,17 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     }
 }
 
-export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
     // Get single file details
     try {
+        const { id: fileId } = await params;
         const session = await getSession();
         if (!session) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
         const stmt = db.prepare('SELECT files.*, users.name as user_name FROM files JOIN users ON files.user_id = users.id WHERE files.id = ?');
-        const file = stmt.get(params.id);
+        const file = stmt.get(fileId);
 
         if (!file) {
             return NextResponse.json({ error: 'File not found' }, { status: 404 });

@@ -3,12 +3,12 @@ import db from '@/lib/db';
 import { getSession } from '@/lib/auth';
 
 // GET all messages for a specific file
-export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
     try {
+        const { id: fileId } = await params;
         const session = await getSession();
         if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-        const fileId = params.id;
         const userId = (session as any).id;
         const userRole = (session as any).role;
 
@@ -40,15 +40,15 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
 }
 
 // POST a new message
-export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
+export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
     try {
+        const { id: fileId } = await params;
         const session = await getSession();
         if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
         const { message } = await req.json();
         if (!message || !message.trim()) return NextResponse.json({ error: 'Message required' }, { status: 400 });
 
-        const fileId = params.id;
         const userId = (session as any).id;
 
         // Insert message
